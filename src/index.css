@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=SF+Pro+Display:wght@200;300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply antialiased;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply text-neutral-700 leading-relaxed;
+    background: linear-gradient(135deg, #FEFEFE 0%, #F8F9FA 100%);
+    color: #374151;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* 通用过渡效果 */
+  .transition-all {
+    transition: all 0.2s ease;
+  }
+
+  .transition-colors {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .transition-transform {
+    transition: transform 0.2s ease;
+  }
+
+  .transition-opacity {
+    transition: opacity 0.2s ease;
+  }
+}
+
+@layer components {
+  /* Instagram极简容器 */
+  .minimal-container {
+    @apply max-w-3xl mx-auto px-8 md:px-12;
+    padding-top: 4rem;
+    padding-bottom: 6rem;
+  }
+  
+  /* 极简卡片样式 */
+  .minimal-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl border-0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.02);
+    @apply transition-all duration-500 ease-out;
+    margin-bottom: 3rem;
+  }
+  
+  .minimal-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+    transform: translateY(-2px);
+  }
+  
+  /* Instagram风格上传区域 */
+  .upload-zone {
+    @apply relative border border-dashed rounded-3xl;
+    border-color: #E5E7EB;
+    @apply p-20 md:p-24 text-center transition-all duration-500 ease-out;
+    @apply cursor-pointer;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    margin-bottom: 4rem;
+  }
+  
+  .upload-zone:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #D1D5DB;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.03);
+  }
+  
+  .upload-zone.has-image {
+    border-style: solid;
+    border-color: #D1D5DB;
+    background: rgba(249, 250, 251, 0.8);
+  }
+  
+  .upload-zone.drag-over {
+    border-color: #9CA3AF;
+    background: rgba(243, 244, 246, 0.9);
+    transform: scale(1.02);
+  }
+  
+  /* 图片卡片 */
+  .image-card {
+    @apply relative rounded-2xl overflow-hidden shadow-xl;
+    @apply bg-white/80 backdrop-blur-sm border border-neutral-100/50;
+    @apply transition-all duration-500;
+    transform: scale(1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .image-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(155, 126, 255, 0.25);
+  }
+
+  .result-card {
+    @apply relative rounded-3xl overflow-hidden shadow-2xl;
+    @apply bg-white/90 backdrop-blur-sm border border-neutral-100/30;
+    @apply transition-all duration-700;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .result-card:hover {
+    box-shadow: 0 25px 50px -12px rgba(155, 126, 255, 0.25);
+  }
+
+  .loading-card {
+    @apply relative rounded-3xl overflow-hidden shadow-xl;
+    @apply bg-gradient-to-br from-white/90 via-lavender-50/80 to-rose-50/80;
+    @apply backdrop-blur-sm border border-neutral-100/50;
+  }
+
+  .transformation-info {
+    @apply p-8 bg-gradient-to-r from-white/60 via-lavender-50/40 to-rose-50/60;
+    @apply backdrop-blur-sm rounded-3xl border border-neutral-100/30 shadow-lg;
+  }
+  
+  /* Instagram极简按钮样式 */
+  .btn-primary {
+    @apply px-10 py-4 text-white rounded-full font-normal;
+    background: linear-gradient(135deg, #374151 0%, #4B5563 100%);
+    @apply transition-all duration-300 ease-out;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(55, 65, 81, 0.15);
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.2);
+    background: linear-gradient(135deg, #4B5563 0%, #6B7280 100%);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(55, 65, 81, 0.15);
+  }
+  
+  .btn-primary:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    @apply cursor-not-allowed;
+    box-shadow: none;
+  }
+
+  /* Instagram风格微动效 */
+  .scale-102 {
+    transform: scale(1.02);
+  }
+
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+
+  .group:hover .group-hover\:scale-102 {
+    transform: scale(1.02);
+  }
+
+  /* 平滑过渡动画 */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s infinite;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounceGentle {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-3px);
+    }
+    60% {
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes bounce-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+
+  .btn-secondary {
+    @apply px-10 py-4 text-neutral-600 border-0 rounded-full font-normal;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    @apply transition-all duration-300 ease-out;
+    position: relative;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .btn-secondary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* 加载状态 */
+  .loading-spinner {
+    @apply w-5 h-5 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin;
+  }
+  
+  /* 结果展示 */
+  .result-container {
+    @apply bg-white rounded-2xl p-8 border border-neutral-200;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  /* 图片网格 */
+  .clothes-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+  
+  .clothes-item {
+    @apply aspect-square rounded-xl overflow-hidden cursor-pointer;
+    @apply border-2 border-transparent transition-all duration-300;
+    @apply hover:border-neutral-400;
+    position: relative;
+  }
+  
+  .clothes-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .clothes-item:hover::before {
+    opacity: 1;
+  }
+  
+  .clothes-item:hover {
+    @apply border-neutral-900;
+    transform: scale(1.02) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .clothes-item.selected {
+    @apply border-neutral-900;
+    box-shadow: 0 0 0 2px rgba(23, 23, 23, 0.1), 0 4px 12px rgba(0,0,0,0.1);
+    transform: scale(1.02);
+  }
+  
+  .clothes-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .clothes-item:hover img {
+    transform: scale(1.05);
+  }
+  
+  /* Instagram极简标题样式 */
+  .title-primary {
+    @apply text-5xl md:text-6xl text-neutral-800 mb-8;
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  
+  .title-secondary {
+    @apply text-3xl md:text-4xl text-neutral-700 mb-12;
+    font-weight: 200;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  
+  .subtitle {
+    @apply text-lg text-neutral-500 font-light leading-relaxed mb-16;
+    letter-spacing: 0.01em;
+  }
+  
+  .section-title {
+    @apply text-xl font-light text-neutral-700 mb-8;
+    letter-spacing: -0.01em;
+  }
+  
+  /* 骨架屏 */
+  .skeleton {
+    @apply animate-pulse-soft bg-neutral-100 rounded-xl;
+  }
+  
+  /* 响应式间距 */
+  .section-spacing {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  
+  .content-spacing {
+    @apply space-y-16 md:space-y-24 lg:space-y-32;
+  }
+  
+  /* 自定义动画 */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  .animate-slideInLeft {
+    animation: slideInLeft 0.6s ease-out forwards;
+  }
+  
+  .animate-slideInRight {
+    animation: slideInRight 0.6s ease-out forwards;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+  
+  /* 延迟动画类 */
+  .animate-delay-100 {
+    animation-delay: 0.1s;
+  }
+  
+  .animate-delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  .animate-delay-300 {
+    animation-delay: 0.3s;
+  }
+  
+  .animate-delay-400 {
+    animation-delay: 0.4s;
+  }
+  
+  .animate-delay-500 {
+    animation-delay: 0.5s;
+  }
+}
