@@ -5,9 +5,15 @@ on:
     branches:
       - main # 当代码被推送到 main 分支时触发
 
+# ↓↓↓ 添加下面这4行关键的权限代码 ↓↓↓
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 使用一个干净的Linux服务器
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
@@ -20,5 +26,5 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages # 部署到 gh-pages 分支
-          folder: dist # Vite构建输出的文件夹是 dist
+          branch: gh-pages
+          folder: dist
