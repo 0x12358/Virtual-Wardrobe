@@ -1,18 +1,5 @@
 import React, { useState, useRef } from 'react';
-
-// 模拟API函数 - 2秒延迟模拟后端调用
-const mockTransform = async (personImage, clothingImage) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // 模拟返回一个合成图片URL（实际应用中这里会是真实的API响应）
-      resolve({
-        success: true,
-        resultImage: personImage, // 简单模拟，实际会是合成后的图片
-        message: '换装完成！这是模拟结果，实际应用中会显示AI合成的换装效果。'
-      });
-    }, 2000);
-  });
-};
+import { nanoBananaTransform } from './utils/nanoBananaApi.js';
 
 // 图片上传组件
 const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage, clothingImages }) => {
@@ -23,7 +10,12 @@ const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => onPersonImageUpload(e.target.result);
+      reader.onload = (e) => {
+        onPersonImageUpload({
+          file: file,
+          preview: e.target.result
+        });
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -32,7 +24,12 @@ const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => onClothingImageUpload(e.target.result);
+      reader.onload = (e) => {
+        onClothingImageUpload({
+          file: file,
+          preview: e.target.result
+        });
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -49,7 +46,7 @@ const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage
           {personImage ? (
             <div className="relative group">
               <img 
-                src={personImage} 
+                src={personImage.preview} 
                 alt="人物照片" 
                 className="w-48 h-64 object-cover rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-105"
               />
@@ -144,7 +141,7 @@ const ClothesGallery = ({ clothingImages, selectedClothing, onClothingSelect }) 
             }`}
           >
             <img 
-              src={image} 
+              src={image.preview} 
               alt={`衣物 ${index + 1}`} 
               className="w-full h-32 object-cover"
             />
@@ -261,11 +258,11 @@ const App = () => {
     setResult(null);
 
     try {
-      const transformResult = await mockTransform(personImage, selectedClothing);
+      const transformResult = await nanoBananaTransform(personImage.file, selectedClothing.file);
       setResult(transformResult);
     } catch (error) {
-      console.error('换装失败:', error);
-      alert('换装失败，请重试！');
+      console.error('AI换装失败:', error);
+      alert(`AI换装失败: ${error.message}，请重试！`);
     } finally {
       setIsLoading(false);
     }
