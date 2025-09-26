@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { nanoBananaTransform } from './utils/nanoBananaApi.js';
+import { apiRateLimiter } from './utils/rateLimiter';
 
 // 图片上传组件
 const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage, clothingImages }) => {
@@ -336,6 +337,9 @@ const App = () => {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [error, setError] = useState(null);
+  const [remainingRequests, setRemainingRequests] = useState(3);
+  const [cooldownTime, setCooldownTime] = useState(0);
 
   const handlePersonImageUpload = (image) => {
     setPersonImage(image);
@@ -359,18 +363,48 @@ const App = () => {
       alert('请先上传人物照片和选择衣物！');
       return;
     }
+    
+    // 检查频率限制
+    const rateLimitCheck = apiRateLimiter.canMakeRequest();
+    if (!rateLimitCheck.allowed) {
+      setError(rateLimitCheck.message);
+      return;
+    }
 
     setIsLoading(true);
+    setError(null);
     setResult(null);
+    
+    // 更新剩余请求次数
+    setRemainingRequests(apiRateLimiter.getRemainingRequests() - 1);
 
     try {
       const transformResult = await nanoBananaTransform(personImage.file, selectedClothing.file);
       setResult(transformResult);
+      
+      // 更新剩余请求次数
+      setRemainingRequests(apiRateLimiter.getRemainingRequests());
     } catch (error) {
       console.error('AI换装失败:', error);
-      alert(`AI换装失败: ${error.message}，请重试！`);
+      setError(error.message || 'AI换装失败，请重试');
+      
+      // 更新剩余请求次数和冷却时间
+      setRemainingRequests(apiRateLimiter.getRemainingRequests());
+      setCooldownTime(Math.ceil(apiRateLimiter.getNextAvailableTime() / 1000));
     } finally {
       setIsLoading(false);
+      
+      // 如果有冷却时间，启动倒计时
+      if (cooldownTime > 0) {
+        const timer = setInterval(() => {
+          const remaining = Math.ceil(apiRateLimiter.getNextAvailableTime() / 1000);
+          setCooldownTime(remaining);
+          if (remaining <= 0) {
+            clearInterval(timer);
+            setRemainingRequests(apiRateLimiter.getRemainingRequests());
+          }
+        }, 1000);
+      }
     }
   };
 
@@ -479,13 +513,38 @@ const App = () => {
               />
             )}
             
+            {/* 频率限制提示 */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center mb-6">
+                <p className="text-red-600 font-medium">{error}</p>
+                {cooldownTime > 0 && (
+                  <p className="text-red-500 text-sm mt-2">
+                    请等待 {cooldownTime} 秒后重试
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* 剩余请求次数显示 */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm">
+                <span className="text-gray-600">今日剩余次数：</span>
+                <span className={`ml-2 font-bold ${
+                  remainingRequests > 1 ? 'text-green-600' : 
+                  remainingRequests === 1 ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  {remainingRequests}
+                </span>
+              </div>
+            </div>
+
             {/* 换装按钮 */}
             <div className="text-center">
               <button 
                 onClick={handleTransform}
-                disabled={!canTransform}
+                disabled={!canTransform || cooldownTime > 0}
                 className={`group relative px-12 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-2xl overflow-hidden ${
-                  canTransform
+                  canTransform && cooldownTime === 0
                     ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white hover:shadow-purple-500/25 hover:scale-105 active:scale-95'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}

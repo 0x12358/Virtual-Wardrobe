@@ -4,17 +4,22 @@
  */
 
 import { fal } from '@fal-ai/client';
+import { apiRateLimiter } from './rateLimiter.js';
 
 // API配置
 export const NANO_BANANA_CONFIG = {
   MODEL_ID: 'fal-ai/nano-banana/edit',
-  API_KEY: '90bc2a9e-d264-49f9-bf38-9f1f8c67c5e4:f0a65afd8838a8b472da3a4e07189a2c',
+  API_KEY: import.meta.env.VITE_FAL_AI_API_KEY || '',
   TIMEOUT: 60000, // 60秒，图像生成需要更长时间
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
   SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp']
 };
 
 // 配置fal客户端
+if (!NANO_BANANA_CONFIG.API_KEY) {
+  console.warn('⚠️ FAL AI API密钥未配置，请检查环境变量 VITE_FAL_AI_API_KEY');
+}
+
 fal.config({
   credentials: NANO_BANANA_CONFIG.API_KEY
 });
@@ -157,6 +162,20 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
   try {
     console.log('=== Nano Banana变装处理开始 ===');
     
+    // 检查API密钥是否配置
+    if (!NANO_BANANA_CONFIG.API_KEY) {
+      throw new Error('API密钥未配置，请联系管理员或检查环境变量配置');
+    }
+    
+    // 检查请求频率限制
+    const rateLimitCheck = apiRateLimiter.canMakeRequest();
+    if (!rateLimitCheck.allowed) {
+      throw new Error(rateLimitCheck.message);
+    }
+    
+    // 记录本次请求
+    apiRateLimiter.recordRequest();
+    
     // 处理人物图片
     let personFile;
     if (typeof personImage === 'string') {
@@ -262,8 +281,42 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
     }
 
   } catch (error) {
-    console.error('Nano Banana AI换装失败:', error);
-    throw error;
+    console.error('=== Nano Banana变装处理失败 ===');
+    console.error('错误详情:', error);
+    
+    // 详细的错误分类和降级处理
+    let errorMessage = '变装处理失败';
+    let shouldRetry = false;
+    
+    if (error.message?.includes('API密钥未配置')) {
+      errorMessage = '服务暂时不可用，请联系管理员';
+    } else if (error.message?.includes('请求过于频繁')) {
+      errorMessage = error.message; // 保持原始频率限制消息
+    } else if (error.message?.includes('timeout') || error.message?.includes('超时')) {
+      errorMessage = '处理超时，请稍后重试';
+      shouldRetry = true;
+    } else if (error.message?.includes('network') || error.message?.includes('网络')) {
+      errorMessage = '网络连接失败，请检查网络后重试';
+      shouldRetry = true;
+    } else if (error.message?.includes('file') || error.message?.includes('图片')) {
+      errorMessage = '图片处理失败，请检查图片格式和大小';
+    } else if (error.message?.includes('quota') || error.message?.includes('limit')) {
+      errorMessage = '服务使用量已达上限，请稍后重试';
+    } else if (error.message?.includes('unauthorized') || error.message?.includes('401')) {
+      errorMessage = '服务认证失败，请联系管理员';
+    } else if (error.message?.includes('500') || error.message?.includes('服务器')) {
+      errorMessage = '服务器暂时不可用，请稍后重试';
+      shouldRetry = true;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // 添加重试建议
+    if (shouldRetry) {
+      errorMessage += '\n\n💡 建议：等待几分钟后重试，或尝试使用较小的图片';
+    }
+    
+    throw new Error(errorMessage);
   }
 };
 
