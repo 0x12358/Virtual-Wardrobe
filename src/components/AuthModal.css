@@ -1,0 +1,409 @@
+/* 模态框遮罩层 */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+/* 模态框主体 */
+.auth-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 关闭按钮 */
+.auth-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #8e8e93;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-modal-close:hover {
+  background-color: #f2f2f7;
+  color: #1c1c1e;
+}
+
+/* 标题区域 */
+.auth-modal-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-modal-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1c1c1e;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.auth-modal-subtitle {
+  font-size: 16px;
+  color: #8e8e93;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 社交登录按钮 */
+.auth-social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.auth-social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: 1.5px solid #e5e5ea;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-social-button:hover {
+  border-color: #d1d1d6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.auth-social-button:active {
+  transform: translateY(0);
+}
+
+.auth-social-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-social-button.google {
+  color: #1c1c1e;
+}
+
+.auth-social-button.apple {
+  color: #1c1c1e;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+/* 分隔线 */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: #8e8e93;
+  font-size: 14px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e5ea;
+}
+
+.auth-divider span {
+  padding: 0 16px;
+  background: #ffffff;
+}
+
+/* 表单 */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-input {
+  padding: 14px 16px;
+  border: 1.5px solid #e5e5ea;
+  border-radius: 12px;
+  font-size: 16px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.auth-input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.auth-input.error {
+  border-color: #ff3b30;
+}
+
+.auth-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
+}
+
+.auth-input::placeholder {
+  color: #8e8e93;
+}
+
+/* 密码输入框 */
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #8e8e93;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #1c1c1e;
+}
+
+/* 错误信息 */
+.auth-error {
+  color: #ff3b30;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.general-error {
+  text-align: center;
+  padding: 12px;
+  background: #fff2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+/* 提交按钮 */
+.auth-submit-button {
+  padding: 16px;
+  background: #007aff;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.auth-submit-button:hover {
+  background: #0056cc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.auth-submit-button:active {
+  transform: translateY(0);
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 切换模式 */
+.auth-toggle {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f2f2f7;
+}
+
+.auth-toggle span {
+  color: #8e8e93;
+  font-size: 14px;
+}
+
+.auth-toggle-button {
+  background: none;
+  border: none;
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.auth-toggle-button:hover {
+  color: #0056cc;
+}
+
+.auth-toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .auth-modal {
+    padding: 24px;
+    margin: 16px;
+    border-radius: 12px;
+  }
+  
+  .auth-modal-title {
+    font-size: 24px;
+  }
+  
+  .auth-modal-subtitle {
+    font-size: 14px;
+  }
+  
+  .auth-social-button {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .auth-input {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  
+  .auth-submit-button {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .auth-modal {
+    background: #1c1c1e;
+    color: #ffffff;
+  }
+  
+  .auth-modal-title {
+    color: #ffffff;
+  }
+  
+  .auth-modal-subtitle {
+    color: #8e8e93;
+  }
+  
+  .auth-social-button {
+    background: #2c2c2e;
+    border-color: #3a3a3c;
+    color: #ffffff;
+  }
+  
+  .auth-social-button:hover {
+    border-color: #48484a;
+  }
+  
+  .auth-input {
+    background: #2c2c2e;
+    border-color: #3a3a3c;
+    color: #ffffff;
+  }
+  
+  .auth-input::placeholder {
+    color: #8e8e93;
+  }
+  
+  .auth-divider::before,
+  .auth-divider::after {
+    background: #3a3a3c;
+  }
+  
+  .auth-divider span {
+    background: #1c1c1e;
+  }
+  
+  .auth-toggle {
+    border-top-color: #3a3a3c;
+  }
+  
+  .general-error {
+    background: #2c1a1a;
+    border-color: #4a2c2c;
+  }
+}

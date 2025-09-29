@@ -176,6 +176,13 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
     // 记录本次请求
     apiRateLimiter.recordRequest();
     
+    // 添加详细的调试信息
+    console.log('=== nanoBananaTransform 参数检查 ===');
+    console.log('personImage type:', typeof personImage);
+    console.log('personImage value:', personImage);
+    console.log('clothesImage type:', typeof clothesImage);
+    console.log('clothesImage value:', clothesImage);
+    
     // 处理人物图片
     let personFile;
     if (typeof personImage === 'string') {
@@ -184,7 +191,8 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
     } else if (personImage instanceof File) {
       personFile = personImage;
     } else {
-      throw new Error('人物图片格式不正确');
+      console.error('人物图片参数错误:', personImage);
+      throw new Error(`人物图片格式不正确，收到的类型: ${typeof personImage}，值: ${personImage}`);
     }
     
     // 处理衣服图片
@@ -195,7 +203,8 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
     } else if (clothesImage instanceof File) {
       clothesFile = clothesImage;
     } else {
-      throw new Error('衣服图片格式不正确');
+      console.error('衣服图片参数错误:', clothesImage);
+      throw new Error(`衣服图片格式不正确，收到的类型: ${typeof clothesImage}，值: ${clothesImage}`);
     }
     
     // 验证输入文件
@@ -222,17 +231,17 @@ export const nanoBananaTransform = async (personImage, clothesImage, options = {
     console.log('图片转换完成，开始调用Nano Banana API...');
 
     // 调用fal API进行变装
-    const enhancedPrompt = "Make the clothing from the first image fit on the person from the second image. Keep the person's face, body pose, and background from the second image unchanged. Only change the clothing to match the style, color, and design from the first image.";
+    const enhancedPrompt = "Place the clothes from the second image onto the model in the first image. Make sure the clothing fits naturally on the model's body, preserving the person's pose, proportions, and lighting. Adjust folds, shadows, and details so the outfit looks realistic and seamless.";
     
     console.log('调用Nano Banana API，参数:', {
       prompt: enhancedPrompt,
-      image_urls: [clothesImageDataUri, personImageDataUri]
+      image_urls: [personImageDataUri, clothesImageDataUri]
     });
     
     const result = await fal.subscribe(NANO_BANANA_CONFIG.MODEL_ID, {
       input: {
         prompt: enhancedPrompt,
-        image_urls: [clothesImageDataUri, personImageDataUri],
+        image_urls: [personImageDataUri, clothesImageDataUri],
         num_images: 1,
         output_format: "jpeg",
         seed: Math.floor(Math.random() * 1000000),

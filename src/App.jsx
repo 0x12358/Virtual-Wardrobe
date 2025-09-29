@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { nanoBananaTransform } from './utils/nanoBananaApi.js';
 import { apiRateLimiter } from './utils/rateLimiter';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AuthModal from './components/AuthModal';
+import UserNav from './components/UserNav';
 
 // 图片上传组件
 const ImageUploader = ({ onPersonImageUpload, onClothingImageUpload, personImage, clothingImages }) => {
@@ -192,7 +195,7 @@ const ClothesGallery = ({ clothingImages, selectedClothing, onClothingSelect }) 
 };
 
 // 结果展示组件
-const ResultDisplay = ({ result, isLoading, onTryAgain }) => {
+const ResultDisplay = ({ result, isLoading, onTryAgain, originalImage }) => {
   if (isLoading) {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-yellow-100">
@@ -260,42 +263,74 @@ const ResultDisplay = ({ result, isLoading, onTryAgain }) => {
         </p>
       </div>
       
-      <div className="flex flex-col items-center space-y-6">
-        <div className="relative group">
-          <img 
-            src={result.resultImage} 
-            alt="换装效果" 
-            className="w-56 h-72 object-cover rounded-3xl shadow-2xl transition-all duration-300 group-hover:scale-105"
-          />
-          <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-3 rounded-full shadow-lg">
-            <span className="text-lg">✓</span>
+      {/* 对比视图 */}
+      <div className="flex flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 mb-8 w-full max-w-6xl mx-auto px-4">
+        {/* 原图 */}
+        {originalImage && (
+          <div className="flex flex-col items-center flex-1 max-w-[45%]">
+            <div className="relative group w-full">
+              <img 
+                src={originalImage} 
+                alt="原始照片" 
+                className="w-full aspect-[3/4] object-cover rounded-2xl sm:rounded-3xl shadow-xl transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg text-xs sm:text-sm font-medium">
+                📷 原图
+              </div>
+            </div>
           </div>
-          <div className="absolute bottom-4 left-4 right-4">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 text-center">
-              <p className="text-gray-800 font-medium text-sm">{result.message}</p>
+        )}
+        
+        {/* 箭头指示 */}
+        {originalImage && (
+          <div className="flex items-center justify-center flex-shrink-0">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 sm:p-3 rounded-full shadow-lg">
+              <span className="text-lg sm:text-xl">→</span>
+            </div>
+          </div>
+        )}
+        
+        {/* 换装结果 */}
+        <div className="flex flex-col items-center flex-1 max-w-[45%]">
+          <div className="relative group w-full">
+            <img 
+              src={result.resultImage} 
+              alt="换装效果" 
+              className="w-full aspect-[3/4] object-cover rounded-2xl sm:rounded-3xl shadow-xl transition-all duration-300 group-hover:scale-105"
+            />
+            <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg text-xs sm:text-sm font-medium">
+              ✨ 换装效果
             </div>
           </div>
         </div>
-        
-        <div className="flex space-x-4">
-          <button 
-            onClick={onTryAgain}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300"
-          >
-            🔄 重新换装
-          </button>
-          <button 
-            onClick={() => {
-              const link = document.createElement('a');
-              link.href = result.resultImage;
-              link.download = 'ai-wardrobe-result.jpg';
-              link.click();
-            }}
-            className="px-6 py-3 bg-white border-2 border-purple-300 text-purple-600 font-semibold rounded-full hover:bg-purple-50 hover:scale-105 transition-all duration-300"
-          >
-            💾 保存图片
-          </button>
+      </div>
+      
+      {/* 成功消息 */}
+      <div className="text-center mb-6">
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 inline-block">
+          <p className="text-green-800 font-medium text-sm">{result.message}</p>
         </div>
+      </div>
+      
+      {/* 操作按钮 */}
+      <div className="flex flex-wrap justify-center gap-4">
+        <button 
+          onClick={onTryAgain}
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300"
+        >
+          🔄 重新换装
+        </button>
+        <button 
+          onClick={() => {
+            const link = document.createElement('a');
+            link.href = result.resultImage;
+            link.download = 'ai-wardrobe-result.jpg';
+            link.click();
+          }}
+          className="px-6 py-3 bg-white border-2 border-purple-300 text-purple-600 font-semibold rounded-full hover:bg-purple-50 hover:scale-105 transition-all duration-300"
+        >
+          💾 保存图片
+        </button>
       </div>
     </div>
   );
@@ -329,8 +364,9 @@ const StepIndicator = ({ currentStep }) => {
   );
 };
 
-// 主应用组件
-const App = () => {
+// 主应用内容组件
+const AppContent = () => {
+  const { requireAuth } = useAuth();
   const [personImage, setPersonImage] = useState(null);
   const [clothingImages, setClothingImages] = useState([]);
   const [selectedClothing, setSelectedClothing] = useState(null);
@@ -340,6 +376,7 @@ const App = () => {
   const [error, setError] = useState(null);
   const [remainingRequests, setRemainingRequests] = useState(3);
   const [cooldownTime, setCooldownTime] = useState(0);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handlePersonImageUpload = (image) => {
     setPersonImage(image);
@@ -364,6 +401,12 @@ const App = () => {
       return;
     }
     
+    // 检查用户是否已登录
+    if (!requireAuth()) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
     // 检查频率限制
     const rateLimitCheck = apiRateLimiter.canMakeRequest();
     if (!rateLimitCheck.allowed) {
@@ -379,6 +422,12 @@ const App = () => {
     setRemainingRequests(apiRateLimiter.getRemainingRequests() - 1);
 
     try {
+      console.log('=== 调试信息 ===');
+      console.log('personImage:', personImage);
+      console.log('personImage.file:', personImage.file);
+      console.log('selectedClothing:', selectedClothing);
+      console.log('selectedClothing.file:', selectedClothing.file);
+      
       const transformResult = await nanoBananaTransform(personImage.file, selectedClothing.file);
       setResult(transformResult);
       
@@ -416,6 +465,20 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 font-inter">
+      {/* 导航栏 */}
+      <nav className="relative z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                AI虚拟衣柜
+              </h1>
+            </div>
+            <UserNav onLoginClick={() => setIsAuthModalOpen(true)} />
+          </div>
+        </div>
+      </nav>
+
       {/* 头部 */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10"></div>
@@ -577,6 +640,7 @@ const App = () => {
               result={result}
               isLoading={isLoading}
               onTryAgain={handleTryAgain}
+              originalImage={personImage?.preview}
             />
           </div>
         </div>
@@ -589,7 +653,23 @@ const App = () => {
           <p className="text-purple-200">基于先进AI技术，让每一次换装都充满惊喜</p>
         </div>
       </footer>
+
+      {/* 认证模态框 */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode="login"
+      />
     </div>
+  );
+};
+
+// 主应用组件（包含认证提供者）
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
